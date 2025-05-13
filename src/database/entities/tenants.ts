@@ -1,11 +1,12 @@
 import { AbstractEntity } from './abstract';
-import { TaggedID } from '../../core/identifiers';
-import { Column, DataSource, Entity } from 'typeorm';
+import { Tag, TaggedID } from '../../core/identifiers';
+import { Column, DataSource, Entity, ManyToOne, Unique } from 'typeorm';
 
 type TenantTag = 'tnt';
 export type TenantID = TaggedID<TenantTag>;
 
 @Entity({ name: 'tenants' })
+@Unique(['name'])
 export class TenantEntity extends AbstractEntity<TenantTag, TenantID> {
   protected get tag(): TenantTag {
     return 'tnt';
@@ -24,3 +25,11 @@ export const tenantsRepositoryProvider = {
   },
   inject: [DataSource],
 };
+
+export abstract class TenantOwnedEntity<
+  TTag extends Tag = Tag,
+  TId extends TaggedID<TTag> = TaggedID<TTag>,
+> extends AbstractEntity<TTag, TId> {
+  @ManyToOne(() => TenantEntity, (tenant) => tenant.id)
+  public tenant: TenantEntity;
+}

@@ -12,4 +12,6 @@ const dataSourceOptions: DataSourceOptions = {
 
 export default new DataSource(dataSourceOptions);
 
-export const dataSourceModule = TypeOrmModule.forRootAsync(dataSourceOptions);
+export const DataSourceModule = TypeOrmModule.forRootAsync({
+  useFactory: () => dataSourceOptions,
+});

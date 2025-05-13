@@ -1,13 +1,13 @@
-import { AbstractEntity } from './abstract';
 import { TaggedID } from '../../core/identifiers';
-import { Column, DataSource, Entity, ManyToOne } from 'typeorm';
-import { TenantEntity } from './tenants';
+import { Column, DataSource, Entity, Unique } from 'typeorm';
+import { TenantOwnedEntity } from './tenants';
 
 type ServiceTag = 'svc';
 export type ServiceID = TaggedID<ServiceTag>;
 
 @Entity({ name: 'services' })
-export class ServiceEntity extends AbstractEntity<ServiceTag, ServiceID> {
+@Unique(['name', 'tenant'])
+export class ServiceEntity extends TenantOwnedEntity<ServiceTag, ServiceID> {
   protected get tag(): ServiceTag {
     return 'svc';
   }
@@ -17,9 +17,6 @@ export class ServiceEntity extends AbstractEntity<ServiceTag, ServiceID> {
 
   @Column()
   public description: string;
-
-  @ManyToOne(() => TenantEntity, (tenant) => tenant.id)
-  public tenant: TenantEntity;
 }
 
 export const DatabaseServicesRepository = 'DatabaseServicesRepository';

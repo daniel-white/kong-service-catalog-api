@@ -1,4 +1,9 @@
-import { BeforeInsert, PrimaryColumn as PrimaryColumnBase } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  PrimaryColumn as PrimaryColumnBase,
+} from 'typeorm';
 import { create, Tag, TaggedID } from '../../core/identifiers';
 
 export function PrimaryColumn(): PropertyDecorator {
@@ -15,10 +20,22 @@ export abstract class AbstractEntity<
   @PrimaryColumn()
   id: TId;
 
+  @Column()
+  createdAt: Date;
+
+  @Column()
+  updatedAt: Date;
+
   protected abstract get tag(): TTag;
 
   @BeforeInsert()
-  generateId() {
+  beforeInsert() {
     this.id = create(this.tag) as TId;
+    this.createdAt = this.updatedAt = new Date();
+  }
+
+  @BeforeUpdate()
+  beforeUpdate() {
+    this.updatedAt = new Date();
   }
 }

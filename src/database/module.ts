@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { dataSourceModule } from './dataSource';
+import { DataSourceModule } from './dataSource';
 import { servicesRepositoryProvider } from './entities/services';
 import { tenantsRepositoryProvider } from './entities/tenants';
 
 @Module({
+  imports: [DataSourceModule],
   providers: [servicesRepositoryProvider, tenantsRepositoryProvider],
   exports: [
-    dataSourceModule,
+    DataSourceModule,
     servicesRepositoryProvider,
     tenantsRepositoryProvider,
   ],
