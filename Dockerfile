@@ -8,7 +8,6 @@ RUN npm prune --production
 
 FROM node:20 AS production
 WORKDIR /app
-RUN curl -sfS https://dotenvx.sh/install.sh | sh
-COPY *.env package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./
+CMD [ "node", "--enable-source-maps", "main.js" ]

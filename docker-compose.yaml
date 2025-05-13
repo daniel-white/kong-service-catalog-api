@@ -19,7 +19,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: not-needed@example.com
       PGADMIN_DEFAULT_PASSWORD: not-needed
     ports:
-      - '5050:80'
+      - '8888:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
@@ -35,7 +35,7 @@ services:
     env_file:
       - .base.env
       - .docker-compose.env
-    command: npx typeorm migration:run --dataSource=database/provider.js
+    command: npx typeorm migration:run --dataSource=database/dataSource.js
 
   api:
     depends_on:
@@ -45,8 +45,10 @@ services:
     env_file:
       - .base.env
       - .docker-compose.env
+    environment:
+      PORT: 3000
     ports:
-      - '80:8000'
+      - '80:3000'
 
 volumes:
   database_data:
