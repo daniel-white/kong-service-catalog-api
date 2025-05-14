@@ -1,6 +1,6 @@
 import { TaggedID } from '../../core/identifiers';
 import { Column, DataSource, Entity, Unique } from 'typeorm';
-import { TenantOwnedEntity } from './tenants';
+import { TenantOwnedEntity } from '../../tenants/services/entities';
 
 type ServiceTag = 'svc';
 export type ServiceID = TaggedID<ServiceTag>;

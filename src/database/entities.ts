@@ -4,7 +4,7 @@ import {
   Column,
   PrimaryColumn as PrimaryColumnBase,
 } from 'typeorm';
-import { create, Tag, TaggedID } from '../../core/identifiers';
+import { create, Tag, TaggedID } from '../core/identifiers';
 
 export function PrimaryColumn(): PropertyDecorator {
   return function (target: object, propertyKey: string | symbol) {

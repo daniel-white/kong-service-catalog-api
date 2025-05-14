@@ -8,14 +8,16 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { TenantsDataService } from '../data/dataService';
+import { TenantsDataService } from '../services/dataService';
 import {
   ApiCreateTenantRequest,
   ApiCreateTenantResponse,
+  ApiGetTenantRequestParams,
   ApiGetTenantResponse,
 } from './types';
-import { tryParse } from '../../../core/identifiers';
-import { BadRequestError, NotFoundError } from '../../../core/errors';
+import { BadRequestError, NotFoundError } from '../../core/errors';
+import { UseZodGuard } from 'nestjs-zod';
+import { TenantID } from '../types';
 
 @Controller('tenants')
 export class TenantsController {
@@ -49,9 +51,10 @@ export class TenantsController {
   }
 
   @Get(':id')
-  getTenant(@Param('id') id: string): Promise<ApiGetTenantResponse> {
-    return tryParse('tnt', id)
-      .asyncAndThen((id) => this.dataService.getTenant({ id }))
+  @UseZodGuard('params', ApiGetTenantRequestParams)
+  getTenant(@Param('id') id: TenantID): Promise<ApiGetTenantResponse> {
+    return this.dataService
+      .getTenant({ id })
       .map((tenant) => ({
         id: tenant.id,
         name: tenant.name,

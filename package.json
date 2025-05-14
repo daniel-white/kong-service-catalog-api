@@ -19,14 +19,17 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
-    "typeorm:generate-migration": "docker compose start database && dotenvx run --env-file .base.env --env-file .development.env -- ts-node node_modules/.bin/typeorm migration:generate --dataSource src/database/dataSource.ts src/database/migrations/$npm_config_name; docker compose stop"
+    "typeorm:generate-migration": "docker compose start database && dotenvx run --env-file .base.env --env-file .development.env -- ts-node node_modules/.bin/typeorm migration:generate --dataSource src/database/dataSource.ts src/database/migrations/$npm_config_name; docker compose stop; npm run format"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.44.0",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
+    "nestjs-zod": "^4.3.1",
     "neverthrow": "^8.2.0",
     "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",

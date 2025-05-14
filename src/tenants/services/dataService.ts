@@ -1,17 +1,28 @@
 import { ResultAsync } from 'neverthrow';
-import {
-  CreateTenantRequest,
-  CreateTenantResponse,
-  GetTenantRequest,
-  GetTenantResponse,
-  TenantNotFoundError,
-} from './types';
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import {
-  DatabaseTenantsRepository,
-  TenantEntity,
-} from 'src/database/entities/tenants';
+import { DatabaseTenantsRepository, TenantEntity } from './entities';
 import { Repository } from 'typeorm';
+import { TenantID, TenantName } from '../types';
+import { NotFoundError } from '../../core/errors';
+
+export interface Tenant {
+  id: TenantID;
+  name: TenantName;
+}
+
+export interface CreateTenantRequest {
+  name: TenantName;
+}
+
+export type CreateTenantResponse = Tenant;
+
+export interface GetTenantRequest {
+  id: TenantID;
+}
+
+export type GetTenantResponse = Tenant;
+
+export class TenantNotFoundError extends NotFoundError {}
 
 @Injectable({
   scope: Scope.REQUEST,

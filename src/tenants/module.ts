@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TenantsController } from './api/controller';
-import { TenantsDataService } from './data/dataService';
+import { TenantsDataService } from './services/dataService';
 import { DatabaseModule } from 'src/database/module';
+import { tenantsRepositoryProvider } from './services/entities';
 
 @Module({
   imports: [DatabaseModule],
   controllers: [TenantsController],
-  providers: [TenantsDataService],
+  providers: [TenantsDataService, tenantsRepositoryProvider],
 })
-export class TenantsDomainModule {}
+export class TenantsModule {}

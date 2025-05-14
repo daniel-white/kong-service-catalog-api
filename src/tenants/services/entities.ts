@@ -1,9 +1,7 @@
-import { AbstractEntity } from './abstract';
-import { Tag, TaggedID } from '../../core/identifiers';
+import { AbstractEntity } from '../../database/entities';
+import { Tag, TaggedID, TenantTag } from '../../core/identifiers';
 import { Column, DataSource, Entity, ManyToOne, Unique } from 'typeorm';
-
-type TenantTag = 'tnt';
-export type TenantID = TaggedID<TenantTag>;
+import { TenantID, TenantName } from '../types';
 
 @Entity({ name: 'tenants' })
 @Unique(['name'])
@@ -13,7 +11,7 @@ export class TenantEntity extends AbstractEntity<TenantTag, TenantID> {
   }
 
   @Column({ length: 255 })
-  public name: string;
+  public name: TenantName;
 }
 
 export const DatabaseTenantsRepository = 'DatabaseTenantsRepository';
