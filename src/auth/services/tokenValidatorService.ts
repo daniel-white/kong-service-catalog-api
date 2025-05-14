@@ -1,7 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ValidateTokenRequest, ValidateTokenResponse } from './types';
 import { ResultAsync } from 'neverthrow';
+import { TenantID } from '../../tenants/types';
+
+export type ValidateTokenRequest = {
+  token: string;
+};
+
+export type ValidateTokenResponse =
+  | {
+      role: 'root';
+    }
+  | {
+      role: 'tenant-admin' | 'tenant-viewer';
+      tenantId: TenantID;
+    };
 
 @Injectable()
 export class TokenValidatorService {
@@ -13,7 +26,7 @@ export class TokenValidatorService {
     return ResultAsync.fromPromise(
       (() => {
         return Promise.resolve(
-          this.jwtService.verify<ValidateTokenResponse>(request.bearerToken),
+          this.jwtService.verify<{ role: string; tid: string }>(request.token),
         );
       })(),
       (err) => {
@@ -22,6 +35,12 @@ export class TokenValidatorService {
         }
         return new Error(`Unknown error: ${err as any}`);
       },
+    ).map(
+      (claims) =>
+        ({
+          role: claims.role,
+          tenantId: claims.tid,
+        }) as ValidateTokenResponse,
     );
   }
 }

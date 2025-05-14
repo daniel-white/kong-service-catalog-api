@@ -3,12 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/module';
 import { TenantsModule } from './tenants/module';
-import { AuthenticationModule } from './authentication/module';
+import { AuthModule } from './auth/module';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { APP_PIPE } from '@nestjs/core';
 
 @Module({
-  imports: [AuthenticationModule, DatabaseModule, TenantsModule],
+  imports: [AuthModule, DatabaseModule, TenantsModule],
   controllers: [AppController],
   providers: [
     {

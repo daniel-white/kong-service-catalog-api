@@ -8,5 +8,6 @@ import { tenantsRepositoryProvider } from './services/entities';
   imports: [DatabaseModule],
   controllers: [TenantsController],
   providers: [TenantsDataService, tenantsRepositoryProvider],
+  exports: [TenantsDataService],
 })
 export class TenantsModule {}

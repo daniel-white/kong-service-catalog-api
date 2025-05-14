@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -15,7 +13,7 @@ import {
   ApiGetTenantRequestParams,
   ApiGetTenantResponse,
 } from './types';
-import { BadRequestError, NotFoundError } from '../../core/errors';
+import { NotFoundError } from '../../core/errors';
 import { UseZodGuard } from 'nestjs-zod';
 import { TenantID } from '../types';
 
@@ -32,15 +30,10 @@ export class TenantsController {
         name: request.name,
       })
       .mapErr((err) => {
-        if (err instanceof BadRequestError) {
-          return new BadRequestException(err.message);
-        } else if (err instanceof NotFoundError) {
+        if (err instanceof NotFoundError) {
           return new NotFoundException(err.message);
-        } else {
-          return new InternalServerErrorException(
-            'An unexpected error occurred',
-          );
         }
+        throw err;
       })
       .match(
         (res) => res,
@@ -60,15 +53,10 @@ export class TenantsController {
         name: tenant.name,
       }))
       .mapErr((err) => {
-        if (err instanceof BadRequestError) {
-          return new BadRequestException(err.message);
-        } else if (err instanceof NotFoundError) {
+        if (err instanceof NotFoundError) {
           return new NotFoundException(err.message);
-        } else {
-          return new InternalServerErrorException(
-            'An unexpected error occurred',
-          );
         }
+        throw err;
       })
       .match(
         (res) => res,
