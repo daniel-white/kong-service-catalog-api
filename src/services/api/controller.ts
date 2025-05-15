@@ -5,10 +5,13 @@ import {
   Get,
   NotFoundException,
   Param,
+  Post,
   Query,
 } from '@nestjs/common';
 import { ServicesDataService } from '../services/data/dataService';
 import {
+  ApiCreateServiceRequest,
+  ApiCreateServiceResponse,
   ApiGetServiceRequestParams,
   ApiGetServiceResponse,
   ApiListServicesRequestQueryParams,
@@ -73,6 +76,43 @@ export class ServicesController {
           name: service.name,
           description: service.description,
         })),
+      }))
+      .mapErr((err) => {
+        if (err instanceof NotFoundError) {
+          return new NotFoundException();
+        }
+        throw err;
+      })
+      .match(
+        (res) => res,
+        (err) => {
+          throw err;
+        },
+      );
+  }
+
+  @Post()
+  @UseZodGuard('body', ApiCreateServiceRequest)
+  async createService(
+    @Body() request: ApiCreateServiceRequest,
+  ): Promise<ApiCreateServiceResponse> {
+    if (
+      !this.clientContextService.isAuthenticated ||
+      !['tenant-admin', 'root'].includes(this.clientContextService.role)
+    ) {
+      throw new ForbiddenException();
+    }
+
+    return this.dataService
+      .createService({
+        name: request.name,
+        description: request.description,
+      })
+      .map((service) => ({
+        id: service.id,
+        tenantId: service.tenantId,
+        name: service.name,
+        description: service.description,
       }))
       .mapErr((err) => {
         if (err instanceof NotFoundError) {

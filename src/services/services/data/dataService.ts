@@ -32,6 +32,13 @@ export type ListServicesResponse = {
   items: Service[];
 };
 
+export interface CreateServiceRequest {
+  name: ServiceName;
+  description?: ServiceDescription;
+}
+
+export type CreateServiceResponse = Service;
+
 export class ServiceNotFoundError extends NotFoundError {}
 
 @Injectable({
@@ -56,7 +63,7 @@ export class ServicesDataService {
 
         const service = await this.repository
           .createQueryBuilder('service')
-          .innerJoin('service.tenant', 'tenant')
+          .innerJoinAndSelect('service.tenant', 'tenant')
           .where('service.id = :serviceId', { serviceId: request.id })
           .andWhere('tenant.id = :tenantId', { tenantId })
           .getOne();
@@ -93,7 +100,7 @@ export class ServicesDataService {
 
         const query = this.repository
           .createQueryBuilder('service')
-          .innerJoin('service.tenant', 'tenant')
+          .innerJoinAndSelect('service.tenant', 'tenant')
           .where('tenant.id = :tenantId', { tenantId });
 
         if (request.after) {
@@ -126,6 +133,38 @@ export class ServicesDataService {
             name: service.name,
             description: service.description,
           })),
+        };
+      })(),
+      (err) => {
+        if (err instanceof Error) {
+          return err;
+        }
+        return new Error(`Unknown error: ${err as any}`);
+      },
+    );
+  }
+
+  createService(
+    request: CreateServiceRequest,
+  ): ResultAsync<CreateServiceResponse, Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        const tenantId = this.clientContextService.tenantId;
+        if (!tenantId) {
+          throw new RangeError('No tenant found in client context');
+        }
+
+        const service = this.repository.create({
+          name: request.name,
+          description: request.description ?? '',
+          tenant: { id: tenantId },
+        });
+        const savedService = await this.repository.save(service);
+        return {
+          id: savedService.id,
+          tenantId: savedService.tenant.id,
+          name: savedService.name,
+          description: savedService.description,
         };
       })(),
       (err) => {

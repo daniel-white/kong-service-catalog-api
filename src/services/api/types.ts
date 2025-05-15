@@ -38,7 +38,7 @@ const ApiListServicesRequestQueryParamsSchema = z.object({
   filter: z.string().optional(),
   sortBy: z.enum(['name', 'lastUpdated']).optional().default('name'),
   sortOrder: z.enum(['ASC', 'DESC']).optional().default('ASC'),
-  limit: z.number().optional().default(15),
+  limit: z.number().min(1).optional().default(15),
   after: serviceIdSchema.optional(),
 });
 
