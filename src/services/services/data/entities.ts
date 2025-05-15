@@ -1,6 +1,7 @@
 import { TaggedID } from '../../../core/identifiers';
 import { Column, DataSource, Entity, Unique } from 'typeorm';
 import { TenantOwnedEntity } from '../../../tenants/services/data/entities';
+import { ServiceDescription, ServiceName } from 'src/services/types';
 
 type ServiceTag = 'svc';
 export type ServiceID = TaggedID<ServiceTag>;
@@ -13,16 +14,16 @@ export class ServiceEntity extends TenantOwnedEntity<ServiceTag, ServiceID> {
   }
 
   @Column({ length: 255 })
-  public name: string;
+  public name: ServiceName;
 
-  @Column()
-  public description: string;
+  @Column({ length: 2048 })
+  public description: ServiceDescription;
 }
 
-export const DatabaseServicesRepository = 'DatabaseServicesRepository';
+export const ServicesRepository = 'ServicesRepository';
 
 export const servicesRepositoryProvider = {
-  provide: DatabaseServicesRepository,
+  provide: ServicesRepository,
   useFactory: (dataSource: DataSource) => {
     return dataSource.getRepository(ServiceEntity);
   },

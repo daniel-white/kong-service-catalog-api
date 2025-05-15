@@ -14,10 +14,10 @@ export class TenantEntity extends AbstractEntity<TenantTag, TenantID> {
   public name: TenantName;
 }
 
-export const DatabaseTenantsRepository = 'DatabaseTenantsRepository';
+export const TenantsRepository = 'TenantsRepository';
 
 export const tenantsRepositoryProvider = {
-  provide: DatabaseTenantsRepository,
+  provide: TenantsRepository,
   useFactory: (dataSource: DataSource) => {
     return dataSource.getRepository(TenantEntity);
   },

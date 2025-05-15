@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow';
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { DatabaseTenantsRepository, TenantEntity } from './entities';
+import { TenantsRepository, TenantEntity } from './entities';
 import { Repository } from 'typeorm';
 import { TenantID, TenantName } from '../../types';
 import { NotFoundError } from '../../../core/errors';
@@ -29,7 +29,7 @@ export class TenantNotFoundError extends NotFoundError {}
 })
 export class TenantsDataService {
   constructor(
-    @Inject(DatabaseTenantsRepository)
+    @Inject(TenantsRepository)
     private readonly repository: Repository<TenantEntity>,
   ) {}
 
