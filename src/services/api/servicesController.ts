@@ -13,6 +13,7 @@ import {
   ApiCreateServiceRequest,
   ApiCreateServiceResponse,
   ApiGetServiceRequestParams,
+  ApiGetServiceRequestQueryParams,
   ApiGetServiceResponse,
   ApiListServicesRequestQueryParams,
 } from './types';
@@ -30,18 +31,28 @@ export class ServicesController {
 
   @Get(':id')
   @UseZodGuard('params', ApiGetServiceRequestParams)
-  async getService(@Param('id') id: ServiceID): Promise<ApiGetServiceResponse> {
+  @UseZodGuard('query', ApiGetServiceRequestQueryParams)
+  async getService(
+    @Param('id') id: ServiceID,
+    @Query() query: ApiGetServiceRequestQueryParams,
+  ): Promise<ApiGetServiceResponse> {
     if (!this.clientContextService.isAuthenticated) {
       throw new ForbiddenException();
     }
 
     return this.dataService
-      .getService({ id })
+      .getService({ id, includeVersions: query.includeVersions })
       .map((service) => ({
         id: service.id,
         tenantId: service.tenantId,
         name: service.name,
         description: service.description,
+        versions: service.versions?.map((version) => ({
+          id: version.id,
+          tenantId: version.tenantId,
+          serviceId: version.serviceId,
+          version: version.version,
+        })),
       }))
       .mapErr((err) => {
         if (err instanceof NotFoundError) {

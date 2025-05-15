@@ -5,6 +5,7 @@ import {
   serviceNameSchema,
 } from '../types';
 import { createZodDto } from 'nestjs-zod';
+import { ZodSemver } from 'zod-semver';
 
 export interface ApiService {
   id: string;
@@ -32,7 +33,23 @@ export class ApiGetServiceRequestParams extends createZodDto(
   ApiGetServiceRequestParamsSchema,
 ) {}
 
-export type ApiGetServiceResponse = ApiService;
+const ApiGetServiceRequestQueryParamsSchema = z.object({
+  includeVersions: z
+    .string()
+    .optional()
+    .refine((value) => value === 'true' || value === 'false', {
+      message: 'Value must be a boolean',
+    })
+    .transform((value) => value === 'true'),
+});
+
+export class ApiGetServiceRequestQueryParams extends createZodDto(
+  ApiGetServiceRequestQueryParamsSchema,
+) {}
+
+export type ApiGetServiceResponse = ApiService & {
+  versions?: ApiServiceVersion[];
+};
 
 const ApiListServicesRequestQueryParamsSchema = z.object({
   filter: z.string().optional(),
@@ -45,3 +62,26 @@ const ApiListServicesRequestQueryParamsSchema = z.object({
 export class ApiListServicesRequestQueryParams extends createZodDto(
   ApiListServicesRequestQueryParamsSchema,
 ) {}
+
+export interface ApiServiceVersion {
+  id: string;
+  tenantId: string;
+  serviceId: string;
+  version: string;
+}
+
+const ApiCreateServiceVersionRequestSchema = z.object({
+  version: ZodSemver,
+});
+
+export class ApiCreateServiceVersionRequest extends createZodDto(
+  ApiCreateServiceVersionRequestSchema,
+) {}
+
+export type ApiCreateServiceVersionResponse = ApiServiceVersion;
+
+const ApiServiceParamsSchema = z.object({
+  serviceId: serviceIdSchema,
+});
+
+export class ApiServiceParams extends createZodDto(ApiServiceParamsSchema) {}

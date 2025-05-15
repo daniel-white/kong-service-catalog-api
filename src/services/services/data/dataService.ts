@@ -1,11 +1,18 @@
 import { ResultAsync } from 'neverthrow';
 import { Inject, Injectable, Scope } from '@nestjs/common';
-import { ServicesRepository, ServiceEntity } from './entities';
+import {
+  ServicesRepository,
+  ServiceEntity,
+  ServiceVersionID,
+  ServiceVersionsRepository,
+  ServiceVersionEntity,
+} from './entities';
 import { Repository } from 'typeorm';
 import { ServiceDescription, ServiceID, ServiceName } from '../../types';
 import { NotFoundError } from '../../../core/errors';
 import { TenantID } from '../../../tenants/types';
 import { ClientContextService } from 'src/auth/services/context/clientContextService';
+import { ZodSemver } from 'zod-semver';
 
 export interface Service {
   id: ServiceID;
@@ -16,9 +23,12 @@ export interface Service {
 
 export interface GetServiceRequest {
   id: ServiceID;
+  includeVersions: boolean;
 }
 
-export type GetServiceResponse = Service;
+export type GetServiceResponse = Service & {
+  versions?: ServiceVersion[];
+};
 
 export type ListServicesRequest = {
   filter?: string;
@@ -39,7 +49,23 @@ export interface CreateServiceRequest {
 
 export type CreateServiceResponse = Service;
 
+export type ServiceVersion = {
+  id: ServiceVersionID;
+  tenantId: TenantID;
+  serviceId: ServiceID;
+  version: string;
+};
+
+export interface CreateServiceVersionRequest {
+  serviceId: ServiceID;
+  version: ZodSemver;
+}
+
+export type CreateServiceVersionResponse = ServiceVersion;
+
 export class ServiceNotFoundError extends NotFoundError {}
+
+export class ServiceVersionNotFoundError extends NotFoundError {}
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -47,7 +73,9 @@ export class ServiceNotFoundError extends NotFoundError {}
 export class ServicesDataService {
   constructor(
     @Inject(ServicesRepository)
-    private readonly repository: Repository<ServiceEntity>,
+    private readonly servicesRepository: Repository<ServiceEntity>,
+    @Inject(ServiceVersionsRepository)
+    private readonly serviceVersionsRepository: Repository<ServiceVersionEntity>,
     private readonly clientContextService: ClientContextService,
   ) {}
 
@@ -61,13 +89,17 @@ export class ServicesDataService {
           throw new RangeError('No tenant found in client context');
         }
 
-        const service = await this.repository
+        const query = this.servicesRepository
           .createQueryBuilder('service')
           .innerJoinAndSelect('service.tenant', 'tenant')
           .where('service.id = :serviceId', { serviceId: request.id })
-          .andWhere('tenant.id = :tenantId', { tenantId })
-          .getOne();
+          .andWhere('tenant.id = :tenantId', { tenantId });
 
+        if (request.includeVersions) {
+          query.leftJoinAndSelect('service.versions', 'versions');
+        }
+
+        const service = await query.getOne();
         if (!service) {
           throw new ServiceNotFoundError('Service not found');
         }
@@ -77,6 +109,14 @@ export class ServicesDataService {
           tenantId: service.tenant.id,
           name: service.name,
           description: service.description,
+          versions: request.includeVersions
+            ? service.versions?.map((version) => ({
+                id: version.id,
+                tenantId: service.tenant.id,
+                serviceId: service.id,
+                version: version.version,
+              }))
+            : undefined,
         };
       })(),
       (err) => {
@@ -98,7 +138,7 @@ export class ServicesDataService {
           throw new RangeError('No tenant found in client context');
         }
 
-        const query = this.repository
+        const query = this.servicesRepository
           .createQueryBuilder('service')
           .innerJoinAndSelect('service.tenant', 'tenant')
           .where('tenant.id = :tenantId', { tenantId });
@@ -154,17 +194,56 @@ export class ServicesDataService {
           throw new RangeError('No tenant found in client context');
         }
 
-        const service = this.repository.create({
+        const service = this.servicesRepository.create({
           name: request.name,
           description: request.description ?? '',
           tenant: { id: tenantId },
         });
-        const savedService = await this.repository.save(service);
+        const savedService = await this.servicesRepository.save(service);
         return {
           id: savedService.id,
           tenantId: savedService.tenant.id,
           name: savedService.name,
           description: savedService.description,
+        };
+      })(),
+      (err) => {
+        if (err instanceof Error) {
+          return err;
+        }
+        return new Error(`Unknown error: ${err as any}`);
+      },
+    );
+  }
+
+  createServiceVersion(
+    request: CreateServiceVersionRequest,
+  ): ResultAsync<CreateServiceVersionResponse, Error> {
+    return ResultAsync.fromPromise(
+      (async () => {
+        const tenantId = this.clientContextService.tenantId;
+        if (!tenantId) {
+          throw new RangeError('No tenant found in client context');
+        }
+
+        const service = await this.servicesRepository.findOne({
+          where: { id: request.serviceId, tenant: { id: tenantId } },
+        });
+        if (!service) {
+          throw new ServiceNotFoundError('Service not found');
+        }
+
+        const version = this.serviceVersionsRepository.create({
+          version: request.version.toString(),
+          service,
+          tenant: { id: tenantId },
+        });
+        const savedVersion = await this.serviceVersionsRepository.save(version);
+        return {
+          id: savedVersion.id,
+          tenantId: savedVersion.tenant.id,
+          serviceId: savedVersion.service.id,
+          version: savedVersion.version,
         };
       })(),
       (err) => {
