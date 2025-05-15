@@ -2,8 +2,8 @@ import { ResultAsync } from 'neverthrow';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { DatabaseTenantsRepository, TenantEntity } from './entities';
 import { Repository } from 'typeorm';
-import { TenantID, TenantName } from '../types';
-import { NotFoundError } from '../../core/errors';
+import { TenantID, TenantName } from '../../types';
+import { NotFoundError } from '../../../core/errors';
 
 export interface Tenant {
   id: TenantID;

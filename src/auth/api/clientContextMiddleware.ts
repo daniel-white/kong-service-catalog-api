@@ -1,12 +1,15 @@
 import {
+  ForbiddenException,
   Injectable,
   NestMiddleware,
   Scope,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { TokenValidatorService } from '../services/tokenValidatorService';
-import { Client, ClientContextService } from '../services/clientContextService';
+import { TokenValidatorService } from '../services/tokens/tokenValidatorService';
+import {
+  Client,
+  ClientContextService,
+} from '../services/context/clientContextService';
 import { okAsync } from 'neverthrow';
 import { tenantIdSchema } from 'src/tenants/types';
 
@@ -35,13 +38,12 @@ export class ClientContextMiddleware implements NestMiddleware {
               ? { tenantId: claims.tenantId }
               : { tenantId: tenantIdFromHeader }),
           }))
-          .mapErr(() => new UnauthorizedException())
+          .mapErr(() => new ForbiddenException())
     )
       .andTee((client: Client) => this.clientContextService.setClient(client))
       .andTee(() => {
-        console.log('Client context set', this.clientContextService);
         next();
       })
-      .orTee(() => next(new UnauthorizedException()));
+      .orTee(() => next(new ForbiddenException()));
   }
 }

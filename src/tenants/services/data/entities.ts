@@ -1,7 +1,7 @@
-import { AbstractEntity } from '../../database/entities';
-import { Tag, TaggedID, TenantTag } from '../../core/identifiers';
+import { AbstractEntity } from '../../../database/entities';
+import { Tag, TaggedID, TenantTag } from '../../../core/identifiers';
 import { Column, DataSource, Entity, ManyToOne, Unique } from 'typeorm';
-import { TenantID, TenantName } from '../types';
+import { TenantID, TenantName } from '../../types';
 
 @Entity({ name: 'tenants' })
 @Unique(['name'])

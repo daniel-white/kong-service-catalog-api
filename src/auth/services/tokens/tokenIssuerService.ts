@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { err, ok, okAsync, ResultAsync } from 'neverthrow';
-import { TenantsDataService } from '../../tenants/services/dataService';
-import { TenantID } from '../../tenants/types';
-import { NotFoundError } from '../../core/errors';
+import { TenantsDataService } from '../../../tenants/services/data/dataService';
+import { TenantID } from '../../../tenants/types';
+import { NotFoundError } from '../../../core/errors';
 
 export type IssueTokenRequest =
   | {

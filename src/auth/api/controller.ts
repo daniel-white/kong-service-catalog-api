@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 
-import { TokenIssuerService } from '../services/tokenIssuerService';
+import { TokenIssuerService } from '../services/tokens/tokenIssuerService';
 import { ApiCreateTokenRequest, ApiCreateTokenResponse } from './types';
 import { TenantID } from 'src/tenants/types';
 

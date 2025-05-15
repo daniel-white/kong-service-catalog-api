@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ResultAsync } from 'neverthrow';
-import { TenantID } from '../../tenants/types';
+import { TenantID } from '../../../tenants/types';
 
 export type ValidateTokenRequest = {
   token: string;

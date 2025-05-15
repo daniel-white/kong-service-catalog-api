@@ -1,20 +1,18 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { TokenIssuerService } from './services/tokenIssuerService';
-import { TokenValidatorService } from './services/tokenValidatorService';
 import { AuthController } from './api/controller';
-import { TenantsModule } from 'src/tenants/module';
 import { ClientContextMiddleware } from './api/clientContextMiddleware';
-import { JwtModule } from './services/jwtModule';
-import { ClientContextService } from './services/clientContextService';
+import { TokensModule } from './services/tokens/module';
+import { AuthContextModule } from './services/context/module';
 
 @Module({
-  imports: [JwtModule, TenantsModule],
+  imports: [TokensModule, AuthContextModule],
   controllers: [AuthController],
-  providers: [ClientContextService, TokenIssuerService, TokenValidatorService],
-  exports: [ClientContextService],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ClientContextMiddleware).exclude('auth/*').forRoutes('*');
+    consumer
+      .apply(ClientContextMiddleware)
+      .exclude('auth/*path')
+      .forRoutes('*');
   }
 }

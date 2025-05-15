@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TenantsController } from './api/controller';
-import { TenantsDataService } from './services/dataService';
-import { DatabaseModule } from 'src/database/module';
-import { tenantsRepositoryProvider } from './services/entities';
+import { tenantsRepositoryProvider } from './services/data/entities';
+import { TenantsDataModule } from './services/data/module';
+import { AuthContextModule } from 'src/auth/services/context/module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [TenantsDataModule, AuthContextModule],
   controllers: [TenantsController],
-  providers: [TenantsDataService, tenantsRepositoryProvider],
-  exports: [TenantsDataService],
+  providers: [tenantsRepositoryProvider],
+  exports: [],
 })
 export class TenantsModule {}

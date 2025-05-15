@@ -1,12 +1,16 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { TenantID } from '../../tenants/types';
+import { TenantID } from '../../../tenants/types';
 import { ok, okAsync, ResultAsync } from 'neverthrow';
 import {
   TenantNotFoundError,
   TenantsDataService,
-} from 'src/tenants/services/dataService';
+} from 'src/tenants/services/data/dataService';
 
-type ClientRole = 'anonymous' | 'root' | 'tenant-admin' | 'tenant-viewer';
+export type ClientRole =
+  | 'anonymous'
+  | 'root'
+  | 'tenant-admin'
+  | 'tenant-viewer';
 
 export type Client =
   | { role: 'anonymous' }
@@ -41,6 +45,10 @@ export class ClientContextService {
         }
         return e;
       });
+  }
+
+  get isAuthenticated(): boolean {
+    return this.role !== 'anonymous';
   }
 
   get role(): ClientRole {
